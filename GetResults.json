@@ -1,0 +1,471 @@
+{
+  "name": "GetResults",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        272
+      ],
+      "id": "5c2ac7c9-8752-4539-9f48-0c04fc4b2f9b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "cBxlROnOffPys8E1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        224
+      ],
+      "id": "cdec0025-f079-4888-93a2-f5f6a24267bf",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "cBxlROnOffPys8E1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"title\": \"QuestionWithCounts\",\n  \"type\": \"object\",\n  \"required\": [\n    \"question\",\n    \"answers\"\n  ],\n  \"properties\": {\n    \"question\": {\n      \"description\": \"The text of the question.\",\n      \"type\": \"string\"\n    },\n    \"answers\": {\n      \"description\": \"An array of possible answers and their counts.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"answerText\",\n          \"count\"\n        ],\n        \"properties\": {\n          \"answerText\": {\n            \"description\": \"The text of the answer option.\",\n            \"type\": \"string\"\n          },\n          \"count\": {\n            \"description\": \"The number of times this answer has been selected.\",\n            \"type\": \"integer\",\n            \"minimum\": 0\n          }\n        }\n      }\n    }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        224
+      ],
+      "id": "33504546-4d73-4077-8310-93c5625cb3fa",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        224
+      ],
+      "id": "195e1609-0584-4242-9b14-ef98c2b54de4",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "cBxlROnOffPys8E1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -624,
+        16
+      ],
+      "id": "076dec8b-016e-436f-96b9-dbbeba7af03b",
+      "name": "When chat message received",
+      "webhookId": "a6e0afe6-7ccd-4a90-9597-7f887f08b4c0"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        272
+      ],
+      "id": "cfe7c118-208c-48fa-891d-5e642f03bda3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "Ow2pcpdLZmo9u2AK",
+          "mode": "list",
+          "cachedResultName": "QPulse_Questions",
+          "cachedResultUrl": "/projects/bxnOhM4iBNlkuQXd/datatables/Ow2pcpdLZmo9u2AK"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "summaryDone",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        272
+      ],
+      "id": "eede9831-0d06-4714-ab1a-83458b89e78a",
+      "name": "GetQuestion"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the GateKeeper for the QPulse Results Summarizer.\n\nGoal: fetch the latest question (where summaryDone=false) and pass ONLY the question text forward.\n\nMANDATORY: When the user asks to summarize or get results, you MUST call the tool `GetQuestion`.\nDo not invent data. Do not ask follow-up questions.\n\nAlgorithm:\n1) Call `GetQuestion` (returns rows where summaryDone is false).\n2) If no rows: output {\"question\":\"\"}.\n3) Else choose the most recent row by `createdAt` (if present), otherwise the first row.\n4) Output STRICT JSON: {\"question\":\"<question text>\"}.\n\nIf the user greets you, reply briefly that you can summarize results, then still fetch the latest question."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "88048d20-3364-4a6a-b22f-25f07711f915",
+      "name": "GateKeeper",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n    \"question\": {\n      \"type\": \"string\",\n      \"description\": \"The question as-is that needs to be answered.\"\n    },\n     \"error\": {\n      \"type\": \"boolean\",\n      \"default\": false,\n      \"description\": \"Return true if you are NOT able to extract the question\"\n    },\n     \"error_msg\": {\n      \"type\": \"string\",\n       \"default\": \"\",\n      \"description\": \"Include the friendly error message back to the user\"\n    }\n  },\n  \"required\": [\n    \"question\", \"error\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        272
+      ],
+      "id": "aebc3319-3894-4db7-8f93-aa39fc8ad0ff",
+      "name": "SOP_Question"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3eNhT2ia342PLt1v",
+          "mode": "list",
+          "cachedResultName": "QPulse_Answers",
+          "cachedResultUrl": "/projects/bxnOhM4iBNlkuQXd/datatables/3eNhT2ia342PLt1v"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "question",
+              "keyValue": "={{$json.output.question}}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        224
+      ],
+      "id": "61d2ca79-2ce8-4943-bfaa-76a82a906304",
+      "name": "get_QPulse_Answers"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Data Retriever.\n\nINPUT: Well formatted json object that has the question\n\nSTEPS:\n1) Treat the input string as `question`.\n2) Use the tool `get_QPulse_Answers` (Data table tool) to fetch ALL rows where `question` equals the input.\n3) Aggregate identical answers by count.\n4) Return STRICT JSON matching this shape:\n{\n  \"question\": \"<question text>\",\n  \"answers\": [ {\"answerText\": \"<answer>\", \"count\": 3} ]\n}\n\nIf there are no rows, return answers as an empty array.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        288,
+        16
+      ],
+      "id": "c568167c-c2c4-4d86-a2b9-05fb0b9a4b93",
+      "name": "Retriever"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "You are a summarizer and decision maker.\n\nINPUT: A JSON object with keys: question (string), answers (array of {answerText, count}).\n\nTASK:\n- Identify the winner answer (highest count). If tie, pick the clearest/most specific.\n- Explain briefly why it won.\n- Return the question + short summary + a markdown table of all answers with counts.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        640,
+        0
+      ],
+      "id": "11299a8d-63ab-40ad-a576-32118a26f318",
+      "name": "Summarizer"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.output }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        960,
+        0
+      ],
+      "id": "73cc3da4-d5f2-46b2-b951-7b4d8f4b4a28",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f0de34c7-7ac9-4a31-8da2-0917c39a0b88",
+              "leftValue": "={{ $json.output.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "49ae2698-2cc5-442e-9e09-c6399d5170f0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "message": "={{ $('GateKeeper').item.json.output.error_msg }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -80
+      ],
+      "id": "00e53943-3e9b-4d6d-9472-f724e655754c",
+      "name": "Respond error msg"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GateKeeper",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Retriever",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Retriever",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "GateKeeper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "GateKeeper",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetQuestion": {
+      "ai_tool": [
+        [
+          {
+            "node": "GateKeeper",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SOP_Question": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "GateKeeper",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GateKeeper": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_QPulse_Answers": {
+      "ai_tool": [
+        [
+          {
+            "node": "Retriever",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retriever": {
+      "main": [
+        [
+          {
+            "node": "Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond error msg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retriever",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5e1588ac-047f-438b-b2c8-5deebfe949d8",
+  "meta": {
+    "instanceId": "b94812f46074610a3dfa5df18e8b87bddfb44479dd5d2a2cf54d1b59a03e5815"
+  },
+  "id": "vCBpG2gGhVwcjGT0",
+  "tags": []
+}

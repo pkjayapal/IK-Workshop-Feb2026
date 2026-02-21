@@ -1,0 +1,108 @@
+{
+  "name": "AddQuestion",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "QPulse",
+        "formDescription": "Quick Pulse of the room",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Enter your Question",
+              "placeholder": "What is your favorite pass time (Hobby)?",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f8c1c63e-21f9-48ab-a394-42181f416a7c",
+      "name": "On form submission",
+      "webhookId": "3f545880-df8f-4e41-a76e-7f87d3c91404"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "Ow2pcpdLZmo9u2AK",
+          "mode": "list",
+          "cachedResultName": "QPulse_Questions",
+          "cachedResultUrl": "/projects/bxnOhM4iBNlkuQXd/datatables/Ow2pcpdLZmo9u2AK"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "summaryDone": false,
+            "question": "={{ $json['Enter your Question'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "question",
+              "displayName": "question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "summaryDone",
+              "displayName": "summaryDone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5c9645c9-0950-483e-bc2c-044d4cd2d010",
+      "name": "Insert row"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3eccdb5a-c01d-4041-b370-6de6a6eccb0b",
+  "meta": {
+    "instanceId": "b94812f46074610a3dfa5df18e8b87bddfb44479dd5d2a2cf54d1b59a03e5815"
+  },
+  "id": "irpXWrkupiBuGAXh",
+  "tags": []
+}
